@@ -1,100 +1,94 @@
-import streamlit as st
-import tensorflow as tf
+import os
+import json
+from PIL import Image
+
 import numpy as np
+import tensorflow as tf
+import streamlit as st
 
 
-#Tensorflow Model Prediction
-def model_prediction(test_image):
-    model = tf.keras.models.load_model("trained_plant_disease_model.keras")
-    image = tf.keras.preprocessing.image.load_img(test_image,target_size=(128,128))
-    input_arr = tf.keras.preprocessing.image.img_to_array(image)
-    input_arr = np.array([input_arr]) #convert single image to batch
-    predictions = model.predict(input_arr)
-    return np.argmax(predictions) #return index of max element
+working_dir = os.path.dirname(os.path.abspath(__file__))
+model_path = f"{working_dir}/model.h5"
+# Load the pre-trained model
+model = tf.keras.models.load_model(model_path)
 
-#Sidebar
-st.sidebar.title("Dashboard")
-app_mode = st.sidebar.selectbox("Select Page",["Home","About","Prediction"])
+# loading the class names
+class_indices = json.load(open(f"{working_dir}/class_indices.json"))
 
-#Main Page
-if(app_mode=="Home"):
-    st.header("PLANT DISEASE RECOGNITION SYSTEM")
-    image_path = "/content/drive/MyDrive/MyPrograms/home_page.jpg"
-    st.image(image_path,use_column_width=True)
-    st.markdown("""#Plant Disease Recognition System 🌿🔍
 
-    **Introduction**
+# Function to Load and Preprocess the Image using Pillow
+def load_and_preprocess_image(image_path, target_size=(224, 224)):
+    # Load the image
+    img = Image.open(image_path)
+    # Resize the image
+    img = img.resize(target_size)
+    # Convert the image to a numpy array
+    img_array = np.array(img)
+    # Add batch dimension
+    img_array = np.expand_dims(img_array, axis=0)
+    # Scale the image values to [0, 1]
+    img_array = img_array.astype('float32') / 255.
+    return img_array
 
-    Welcome to the Plant Disease Recognition System, a cutting-edge project developed for our final year project. Our system aims to assist in the efficient identification of plant diseases. By uploading an image of a plant, our system can quickly analyze it to detect any signs of diseases, helping to protect crops and ensure a healthier harvest.
 
-    ### How It Works
-    1. **Upload Image:** Navigate to the **Prediction** page and upload an image of a plant showing symptoms of disease.
-      
-    2. **Analysis:** Our system utilizes state-of-the-art machine learning algorithms to process the image and identify potential diseases.
-      
-    3. **Results:** View detailed results and receive recommendations for further action.
+# Function to Predict the Class of an Image
+def predict_image_class(model, image_path, class_indices):
+    preprocessed_img = load_and_preprocess_image(image_path)
+    predictions = model.predict(preprocessed_img)
+    predicted_class_index = np.argmax(predictions, axis=1)[0]
+    predicted_class_name = class_indices[str(predicted_class_index)]
+    return predicted_class_name
 
-    ### Features
-    - **Accuracy:** Our system employs advanced machine learning techniques for accurate disease detection.
-      
-    - **User-Friendly:** Enjoy a simple and intuitive interface designed for a seamless user experience.
-      
-    - **Fast and Efficient:** Receive results in seconds, enabling quick decision-making in the field.
 
-    ### Dataset
-    Our system is trained on a comprehensive dataset of about 87,000 RGB images of healthy and diseased crop leaves, categorized into 38 different classes. The dataset is divided into an 80/20 ratio of training and validation sets, preserving the directory structure. Additionally, a new directory containing 33 test images has been created for prediction purposes.
+# Streamlit App
 
-    ### Get Started
-    Click on the **Prediction** page in the sidebar to upload an image and experience the power of our Plant Disease Recognition System!
+st.header("Plant Disease Recognition System 🌿🔍")
+image_path = "home_page.jpg"
+st.image(image_path, use_column_width=True)
+st.markdown(""" 
+### Introduction
+Welcome to the Plant Disease Recognition System, a cutting-edge project developed for our final year project. Our system aims to assist in the efficient identification of plant diseases. By uploading an image of a plant, our system can quickly analyze it to detect any signs of diseases, helping to protect crops and ensure a healthier harvest.
+     
+### Team Members
+- Aditi Tomar (Roll No. 12345)
+- Ansh Agarwal (Roll No. 23456)
+- Atul (Roll No. 34567)
+- Ankit Bisht (Roll No. 45678)
+    
+### How It Works
+- **Upload Image:** Navigate to the **Prediction** page and upload an image of a plant showing symptoms of disease.
+- **Analysis:** Our system utilizes state-of-the-art machine learning algorithms to process the image and identify potential diseases.
+- **Results:** View detailed results and receive recommendations for further action.
 
-    ### About Us
-    Learn more about our project, team members, and goals on the **About** page."""
-  )
+### Features
+- **Accuracy:** Our system employs advanced machine learning techniques for accurate disease detection.
+- **User-Friendly:** Enjoy a simple and intuitive interface designed for a seamless user experience.
+- **Fast and Efficient:** Receive results in seconds, enabling quick decision-making in the field.
 
-#About Project
-elif(app_mode=="About"):
-    st.header("About")
-    image_path = "/content/drive/MyDrive/MyPrograms/about_img.jpg"
-    st.markdown("""
-                ### About the Dataset
+### Dataset    
+This dataset is part of a crowdsourcing effort to leverage smartphone technology and machine learning for improving food production by addressing the issue of infectious diseases in crops.
+- Size: Over 50,000 expertly curated images.
+- Content: The images consist of healthy and infected leaves of crop plants.
+- Platform: The dataset is released on the PlantVillage online platform.
+- Purpose: The dataset is intended to facilitate the development of mobile disease diagnostics using machine learning and crowdsourcing.
+- Goal: The goal is to use computer vision approaches to address yield losses in crop plants caused by infectious diseases.
 
-                This dataset has been created through offline augmentation from the original dataset, comprising approximately 87,000 RGB images of both healthy and diseased crop leaves categorized into 38 different classes. The dataset is structured into training and validation sets with an 80/20 split, preserving the directory structure.
+### Prediction
+Upload an image and experience the power of our Plant Disease Recognition System!"""
+)
 
-                #### Dataset Contents
-                - **Train Dataset:** 70,295 images
-                - **Test Dataset:** 33 images
-                - **Validation Dataset:** 17,572 images
+uploaded_image = st.file_uploader("", type=["jpg", "jpeg", "png"])
 
-                 ### Team Members:
-                - Aditi Tomar (Roll No. 12345)
-                - Ansh Agarwal (Roll No. 23456)
-                - Atul (Roll No. 34567)
-                - Ankit Bisht(Roll No. 45678)
-                """)
+if uploaded_image is not None:
+    image = Image.open(uploaded_image)
+    col1, col2 = st.columns(2)
 
-#Prediction Page
-elif(app_mode=="Prediction"):
-    st.header("Prediction")
-    test_image = st.file_uploader("Choose an Image:")
-    if(st.button("Show Image")):
-        st.image(test_image,width=4,use_column_width=True)
-    #Predict button
-    if(st.button("Predict")):
-        st.write("Our Prediction")
-        result_index = model_prediction(test_image)
-        #Reading Labels
-        class_name = ['Apple___Apple_scab', 'Apple___Black_rot', 'Apple___Cedar_apple_rust', 'Apple___healthy',
-                    'Blueberry___healthy', 'Cherry_(including_sour)___Powdery_mildew', 
-                    'Cherry_(including_sour)___healthy', 'Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot', 
-                    'Corn_(maize)___Common_rust_', 'Corn_(maize)___Northern_Leaf_Blight', 'Corn_(maize)___healthy', 
-                    'Grape___Black_rot', 'Grape___Esca_(Black_Measles)', 'Grape___Leaf_blight_(Isariopsis_Leaf_Spot)', 
-                    'Grape___healthy', 'Orange___Haunglongbing_(Citrus_greening)', 'Peach___Bacterial_spot',
-                    'Peach___healthy', 'Pepper,_bell___Bacterial_spot', 'Pepper,_bell___healthy', 
-                    'Potato___Early_blight', 'Potato___Late_blight', 'Potato___healthy', 
-                    'Raspberry___healthy', 'Soybean___healthy', 'Squash___Powdery_mildew', 
-                    'Strawberry___Leaf_scorch', 'Strawberry___healthy', 'Tomato___Bacterial_spot', 
-                    'Tomato___Early_blight', 'Tomato___Late_blight', 'Tomato___Leaf_Mold', 
-                    'Tomato___Septoria_leaf_spot', 'Tomato___Spider_mites Two-spotted_spider_mite', 
-                    'Tomato___Target_Spot', 'Tomato___Tomato_Yellow_Leaf_Curl_Virus', 'Tomato___Tomato_mosaic_virus',
-                      'Tomato___healthy']
-        st.success("Model is Predicting it's a {}".format(class_name[result_index]))
+    with col1:
+        resized_img = image.resize((150, 150))
+        st.image(resized_img)
+
+    with col2:
+        if st.button('Classify'):
+            # Preprocess the uploaded image and predict the class
+            prediction = predict_image_class(model, uploaded_image, class_indices)
+            st.success(f'Prediction: {str(prediction)}')
