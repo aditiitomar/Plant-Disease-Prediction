@@ -1,7 +1,6 @@
 import os
 import json
 from PIL import Image
-
 import numpy as np
 import tensorflow as tf
 import streamlit as st
@@ -12,7 +11,7 @@ working_dir = os.path.dirname(os.path.abspath(__file__))
 model_path = os.path.join(working_dir, "model.h5")
 class_indices_path = os.path.join(working_dir, "class_indices.json")
 
-# URL of the model on Google Drive
+# URL of the model on Google Drive (Direct download link)
 model_url = "https://drive.google.com/uc?id=1cgOXZQkK1Yt60b0Ry0wUZoc2fSaQhW_V"
 
 # Download the model if it doesn't exist
@@ -26,7 +25,6 @@ model = tf.keras.models.load_model(model_path)
 with open(class_indices_path, "r") as f:
     class_indices = json.load(f)
 
-
 # Function to Load and Preprocess the Image using Pillow
 def load_and_preprocess_image(image, target_size=(224, 224)):
     img = Image.open(image)
@@ -36,7 +34,6 @@ def load_and_preprocess_image(image, target_size=(224, 224)):
     img_array = img_array.astype('float32') / 255.
     return img_array
 
-
 # Function to Predict the Class of an Image
 def predict_image_class(model, image, class_indices):
     preprocessed_img = load_and_preprocess_image(image)
@@ -44,7 +41,6 @@ def predict_image_class(model, image, class_indices):
     predicted_class_index = np.argmax(predictions, axis=1)[0]
     predicted_class_name = class_indices[str(predicted_class_index)]
     return predicted_class_name
-
 
 # Streamlit App
 st.header("Plant Disease Recognition System 🌿🔍")
@@ -56,13 +52,13 @@ st.image(home_image_path, use_column_width=True)
 st.markdown("""
 ### Introduction
 Welcome to the Plant Disease Recognition System, a cutting-edge project developed for our final year project. Our system aims to assist in the efficient identification of plant diseases. By uploading an image of a plant, our system can quickly analyze it to detect any signs of diseases, helping to protect crops and ensure a healthier harvest.
-
+     
 ### Team Members
-- Aditi Tomar 
-- Ansh Agarwal 
-- Atul 
-- Ankit Bisht 
-
+- Aditi Tomar (Roll No. 12345)
+- Ansh Agarwal (Roll No. 23456)
+- Atul (Roll No. 34567)
+- Ankit Bisht (Roll No. 45678)
+    
 ### How It Works
 - **Upload Image:** Navigate to the **Prediction** page and upload an image of a plant showing symptoms of disease.
 - **Analysis:** Our system utilizes state-of-the-art machine learning algorithms to process the image and identify potential diseases.
