@@ -5,15 +5,24 @@ from PIL import Image
 import numpy as np
 import tensorflow as tf
 import streamlit as st
+import gdown
 
+# Define the working directory and paths
 working_dir = os.path.dirname(os.path.abspath(__file__))
 model_path = os.path.join(working_dir, "model.h5")
 class_indices_path = os.path.join(working_dir, "class_indices.json")
 
+# URL of the model on Google Drive
+model_url = "https://drive.google.com/uc?id=1cgOXZQkK1Yt60b0Ry0wUZoc2fSaQhW_V"
+
+# Download the model if it doesn't exist
+if not os.path.exists(model_path):
+    gdown.download(model_url, model_path, quiet=False)
+
 # Load the pre-trained model
 model = tf.keras.models.load_model(model_path)
 
-# Loading the class names
+# Load the class names
 with open(class_indices_path, "r") as f:
     class_indices = json.load(f)
 
@@ -49,10 +58,10 @@ st.markdown("""
 Welcome to the Plant Disease Recognition System, a cutting-edge project developed for our final year project. Our system aims to assist in the efficient identification of plant diseases. By uploading an image of a plant, our system can quickly analyze it to detect any signs of diseases, helping to protect crops and ensure a healthier harvest.
 
 ### Team Members
-- Aditi Tomar (Roll No. 12345)
-- Ansh Agarwal (Roll No. 23456)
-- Atul (Roll No. 34567)
-- Ankit Bisht (Roll No. 45678)
+- Aditi Tomar 
+- Ansh Agarwal 
+- Atul 
+- Ankit Bisht 
 
 ### How It Works
 - **Upload Image:** Navigate to the **Prediction** page and upload an image of a plant showing symptoms of disease.
@@ -76,7 +85,7 @@ This dataset is part of a crowdsourcing effort to leverage smartphone technology
 Upload an image and experience the power of our Plant Disease Recognition System!
 """)
 
-uploaded_image = st.file_uploader("", type=["jpg", "jpeg", "png"])
+uploaded_image = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"], label_visibility="hidden")
 
 if uploaded_image is not None:
     image = Image.open(uploaded_image)
