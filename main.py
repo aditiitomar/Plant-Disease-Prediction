@@ -54,10 +54,10 @@ st.markdown("""
 Welcome to the Plant Disease Recognition System, a cutting-edge project developed for our final year project. Our system aims to assist in the efficient identification of plant diseases. By uploading an image of a plant, our system can quickly analyze it to detect any signs of diseases, helping to protect crops and ensure a healthier harvest.
      
 ### Team Members
-- Aditi Tomar (Roll No. 12345)
-- Ansh Agarwal (Roll No. 23456)
-- Atul (Roll No. 34567)
-- Ankit Bisht (Roll No. 45678)
+- Aditi Tomar 
+- Ansh Agarwal 
+- Atul 
+- Ankit Bisht 
     
 ### How It Works
 - **Upload Image:** Navigate to the **Prediction** page and upload an image of a plant showing symptoms of disease.
